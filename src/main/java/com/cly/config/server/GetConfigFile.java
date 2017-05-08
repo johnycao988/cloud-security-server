@@ -51,6 +51,8 @@ public class GetConfigFile extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
+		try{
+			
 		String reqAuthCode = request.getParameter("AUTH_CODE");
 		String configFile = request.getParameter("CONFIG_FILE_NAME");
 
@@ -59,6 +61,12 @@ public class GetConfigFile extends HttpServlet {
 		}
 
 		readConfigFile(configFile, response);
+		}catch(IOException ie){
+			logger.warning(ie.getMessage());
+			throw ie;
+		}
+		
+		
 
 	}
 
