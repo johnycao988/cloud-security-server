@@ -2,7 +2,7 @@ package com.cly.config.server;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.OutputStream; 
+import java.io.OutputStream;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
@@ -51,22 +51,14 @@ public class GetConfigFile extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		try{
-			
 		String reqAuthCode = request.getParameter("AUTH_CODE");
 		String configFile = request.getParameter("CONFIG_FILE_NAME");
 
 		if (authCode != null && !authCode.equals(reqAuthCode)) {
-			throw new ServletException("Invalide Auth code.");
+			throw new ServletException("Invalide Auth code:" + reqAuthCode);
 		}
 
 		readConfigFile(configFile, response);
-		}catch(IOException ie){
-			logger.warning(ie.getMessage());
-			throw ie;
-		}
-		
-		
 
 	}
 
@@ -74,26 +66,33 @@ public class GetConfigFile extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		 response.getWriter().println("Cloud Config Server V1.0, relased on May 8, 2017. ");	 
+		response.getWriter().println("Cloud Config Server V1.0, relased on May 8, 2017. ");
 
 	}
-	
+
 	protected void readConfigFile(String configFile, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		try (FileInputStream fileInput = new FileInputStream(configFile); OutputStream out=response.getOutputStream()) {
+		try {
 
-			byte[] buffer = new byte[4098];
+			try (FileInputStream fileInput = new FileInputStream(configFile);
+					OutputStream out = response.getOutputStream()) {
 
-			int byteread = 0;
+				byte[] buffer = new byte[4098];
 
-			while ((byteread = fileInput.read(buffer)) != -1) {
+				int byteread = 0;
 
-				out.write(buffer, 0, byteread);
+				while ((byteread = fileInput.read(buffer)) != -1) {
 
+					out.write(buffer, 0, byteread);
+
+				}
 			}
-		}
 
+		} catch (IOException ie) {
+			logger.warning(ie.getMessage());
+			throw ie;
+		}
 	}
 
 }
