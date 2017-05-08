@@ -62,6 +62,14 @@ public class GetConfigFile extends HttpServlet {
 
 	}
 
+	@Override
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		 response.getWriter().println("Cloud Config Server V1.0, relased on May 8, 2017. ");	 
+
+	}
+	
 	protected void readConfigFile(String configFile, HttpServletResponse response)
 			throws ServletException, IOException {
 

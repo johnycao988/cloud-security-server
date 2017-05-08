@@ -1,0 +1,3 @@
+# create Tomcat container
+
+docker run -p 6069:8080 --name cloud.config.server 10.39.101.226:5000/tomcat
