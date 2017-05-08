@@ -55,7 +55,7 @@ public class GetConfigFile extends HttpServlet {
 		String configFile = request.getParameter("CONFIG_FILE_NAME");
 
 		if (authCode != null && !authCode.equals(reqAuthCode)) {
-			throw new ServletException("Invalide Auth code:" + reqAuthCode);
+			throw new IOException("Invalide Auth code:" + reqAuthCode);
 		}
 
 		readConfigFile(configFile, response);
