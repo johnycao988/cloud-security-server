@@ -39,9 +39,8 @@ public class GetConfigFile extends HttpServlet {
 
 		if (authCode == null) {
 			logger.warning("Property:[" + AUTH_CODE + "] of Config Server is not set.");
-		}else{
-			logger.warning("Auth Code:[" + AUTH_CODE + "].");
-		}
+		} else
+			authCode = authCode.trim();
 
 	}
 
@@ -54,8 +53,12 @@ public class GetConfigFile extends HttpServlet {
 			throws ServletException, IOException {
 
 		String reqAuthCode = request.getParameter("AUTH_CODE");
-		String configFile = request.getParameter("CONFIG_FILE_NAME");
 
+		if (reqAuthCode != null)
+			reqAuthCode = reqAuthCode.trim();
+
+		String configFile = request.getParameter("CONFIG_FILE_NAME");
+		
 		if (authCode != null && !authCode.equals(reqAuthCode)) {
 			throw new IOException("Invalide Auth code:" + reqAuthCode);
 		}
