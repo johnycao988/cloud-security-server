@@ -39,6 +39,8 @@ public class GetConfigFile extends HttpServlet {
 
 		if (authCode == null) {
 			logger.warning("Property:[" + AUTH_CODE + "] of Config Server is not set.");
+		}else{
+			logger.warning("Auth Code:[" + AUTH_CODE + "].");
 		}
 
 	}
