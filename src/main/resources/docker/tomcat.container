@@ -1,3 +1,15 @@
-# create Tomcat container
+# create Tomcat docker container
 
 docker run -d -p 6069:8080 --name cloud.config.server -v /AppConfig/dev:/AppConfig/dev -v /AppConfig/dev/tomcat.conf:/usr/local/tomcat/conf 10.39.101.226:5000/tomcat
+
+#Jenkins 
+
+1. define Propagate environment variables:
+  mvn=/var/jenkins_home/tools/hudson.tasks.Maven_MavenInstallation/Maven3.3.9/bin/mvn
+  docker=/var/jenkins_home/tools/org.jenkinsci.plugins.docker.commons.tools.DockerTool/Docker/bin/docker
+2. shell script:
+$mvn clean
+$mvn package 
+$docker -H 10.39.101.226:2375 cp $WORKSPACE/target/cloud-config-server.war cloud.config.server:usr/local/tomcat/webapps
+$docker -H 10.39.101.226:2375 restart cloud.config.server
+ 
