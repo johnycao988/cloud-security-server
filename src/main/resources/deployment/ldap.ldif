@@ -1,0 +1,37 @@
+version: 1
+
+dn: ou=users,dc=example,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: users
+
+dn: uid=bill.wu,ou=users,dc=example,dc=com
+objectClass: top
+objectClass: inetOrgPerson
+objectClass: person
+objectClass: organizationalPerson
+cn: Bill Wu
+sn: Bill
+uid: bill.wu
+userPassword:: e01ENX1yZEtJSE40VENZbWZVQlg2cHJ6KzZnPT0=
+
+dn: uid=johnny.cao,ou=users,dc=example,dc=com
+objectClass: top
+objectClass: inetOrgPerson
+objectClass: person
+objectClass: organizationalPerson
+cn: Johnny Cao
+sn: Johnny
+uid: johnny.cao
+userPassword:: e01ENX1yZEtJSE40VENZbWZVQlg2cHJ6KzZnPT0=
+
+dn: uid=bin.bai,ou=users,dc=example,dc=com
+objectClass: top
+objectClass: inetOrgPerson
+objectClass: person
+objectClass: organizationalPerson
+cn: Bin Bai
+sn: Bin
+uid: bin.bai
+userPassword:: e01ENX1yZEtJSE40VENZbWZVQlg2cHJ6KzZnPT0=
+
