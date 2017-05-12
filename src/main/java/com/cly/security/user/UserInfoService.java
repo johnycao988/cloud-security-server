@@ -11,6 +11,6 @@ public interface UserInfoService {
 	
 	public void setPasswordEncryptService(PasswordEncrypt pwdService);
 	
-	public UserInfo login(String jsonMsg) throws SecurityServerException;
+	public UserInfo login(String userId, String userPwd) throws SecurityServerException;
 	
 }

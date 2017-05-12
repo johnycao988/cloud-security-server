@@ -1,17 +1,14 @@
 package com.cly.security.user;
 
 import java.io.Serializable;
-import java.util.Properties;
-import java.util.UUID;
-
+import java.util.Properties; 
 import javax.naming.NamingException;
 import javax.naming.directory.Attributes; 
+import com.cly.comm.util.IDUtil;
 import com.cly.ldap.LDAPContext;
 import com.cly.ldap.LDAPSearch;
 import com.cly.security.password.PasswordEncrypt;
-import com.cly.security.server.SecurityServerException;
-
-import net.sf.json.JSONObject;
+import com.cly.security.server.SecurityServerException; 
 
 public class LDAPUserInfoService implements UserInfoService {
 
@@ -24,16 +21,11 @@ public class LDAPUserInfoService implements UserInfoService {
 	LDAPSearch ldapSearch;
 
 	@Override
-	public UserInfo login(String jsonMsg) throws SecurityServerException {
+	public UserInfo login(String userId, String userPwd) throws SecurityServerException {
 
 		try {
 
-			JSONObject msg = JSONObject.fromObject(jsonMsg);
-
-			String userId = msg.getString(UserConst.USER_ID);
-
-			String userPwd = msg.getString(UserConst.USER_PW);
-
+	
 			if (userId == null || userPwd == null)
 				throw new SecurityServerException("", ERR_MSG_INVALIDATE_USER_PWD);
 
@@ -52,7 +44,7 @@ public class LDAPUserInfoService implements UserInfoService {
 			UserInfoImpl ui = new UserInfoImpl();
 			ui.setUserId(userId);
 			ui.setUserName(slUserName);
-			ui.setAuthCode(UUID.randomUUID().toString());
+			ui.setAuthCode(IDUtil.getRandomBase64UUID());
 			return ui;
 		} catch (SecurityServerException se) {
 			throw se;

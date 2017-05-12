@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import com.cly.comm.client.http.HttpClient;
 import com.cly.comm.client.http.HttpRequestParam;
+import com.cly.security.server.SecuConst;
 
 import net.sf.json.JSONObject;
 
@@ -22,8 +23,8 @@ public class LDAPUserInfoServiceTest {
 
 			JSONObject msg = new JSONObject();
 
-			msg.put(UserConst.USER_ID, "johnny.cao");
-			msg.put(UserConst.USER_PW, "ldap123");
+			msg.put(SecuConst.USER_ID, "johnny.cao");
+			msg.put(SecuConst.USER_PW, "ldap123");
 			rp.addParam(HttpRequestParam.REQ_JSON_MESSAGE_NAME, msg.toString()); 
 			 
 			String res = HttpClient.request(url, HttpClient.REQUEST_METHOD_POST, rp);
