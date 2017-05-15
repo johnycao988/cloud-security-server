@@ -32,7 +32,7 @@ public class Sys {
 	@Path("/refresh")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String refresh() {
-		return SecurityServiceMgr.refresh(); 
+		return SecurityServiceMgr.refresh();
 	}
 
 }

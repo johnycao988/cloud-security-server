@@ -24,7 +24,6 @@ public class LDAPUserInfoService implements UserInfoService {
 	public UserInfo login(String userId, String userPwd) throws SecurityServerException {
 
 		try {
-
 	
 			if (userId == null || userPwd == null)
 				throw new SecurityServerException("", ERR_MSG_INVALIDATE_USER_PWD);
@@ -126,5 +125,7 @@ class UserInfoImpl implements UserInfo, Serializable {
 	public void setAuthCode(String authCode) {
 		this.authCode = authCode;
 	}
+
+ 
 
 }

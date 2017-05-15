@@ -23,8 +23,10 @@
     <div class="row marketing">
         <div class="col-lg-10">
              <form class="form-horizontal" method="post" action="${pageContext.request.contextPath}/rest/user/pageLogin"> 
+  
+                <input type="hidden" name="AUTH_REDIRECT_URL" value="<%=request.getParameter("AUTH_REDIRECT_URL") %>">
                 
-                 <div class="form-group">
+                <div class="form-group">
                     <label for="username" class="col-sm-4 control-label">User Id</label>
                     <div class="col-sm-8">
                         <input type="text" class="form-control" id="_OAUTH2_USER_ID" name="userId" placeholder="User Id">
@@ -38,7 +40,7 @@
                 </div>
                 <div class="form-group">
                     <div class="col-sm-offset-4 col-sm-8">
-                        <button type="submit" class="btn btn-default">Login</button>
+                        <button type="submit" class="btn btn-default" name="#tnLogin">Login</button>
                     </div>
                 </div>
             </form>

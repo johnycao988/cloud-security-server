@@ -1,7 +1,9 @@
 package com.cly.security.server;
 
+import java.io.IOException;
 import java.util.Properties;
 
+import com.cly.cache.CacheMgr;
 import com.cly.cache.KeyValue;
 import com.cly.comm.client.config.ConfigClient;
 import com.cly.logging.CLYLoggerManager;
@@ -34,11 +36,12 @@ public class SecurityServiceMgr {
 
 	}
 
-	public static String refresh() {
+	public static String refresh(){
 		securityProperties = null;
 		userInfoService = null;
 		pwdEncryptService = null;
-		kvService=null;
+		kvService = null;
+		initSecurityCache();
 		return "Security Server Refresh completed.";
 	}
 
@@ -97,6 +100,15 @@ public class SecurityServiceMgr {
 
 		} catch (Exception e) {
 			throw new SecurityServerException(e, null, "Service:" + propName + " failed to initial.");
+		}
+	}
+
+	public static void initSecurityCache() {
+		try {
+			CacheMgr.init(ConfigClient.getInputStream("cloud.security.server.cache.xml"));
+		} catch (Exception e) {
+
+			CLYLoggerManager.getRootLogger().fatalException(e);
 		}
 	}
 
