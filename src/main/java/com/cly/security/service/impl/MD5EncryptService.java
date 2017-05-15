@@ -1,9 +1,9 @@
-package com.cly.security.password;
+package com.cly.security.service.impl;
 
 import java.security.MessageDigest;
- 
 
-import com.cly.security.server.SecurityServerException;
+import com.cly.security.PasswordEncrypt;
+import com.cly.security.SecurityServerException;
 
 import net.iharder.Base64; 
 public class MD5EncryptService implements PasswordEncrypt {

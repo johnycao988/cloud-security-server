@@ -1,4 +1,4 @@
-package com.cly.security.user;
+package com.cly.security.service.impl;
 
 import java.io.Serializable;
 import java.util.Properties; 
@@ -7,8 +7,10 @@ import javax.naming.directory.Attributes;
 import com.cly.comm.util.IDUtil;
 import com.cly.ldap.LDAPContext;
 import com.cly.ldap.LDAPSearch;
-import com.cly.security.password.PasswordEncrypt;
-import com.cly.security.server.SecurityServerException; 
+import com.cly.security.PasswordEncrypt;
+import com.cly.security.SecurityServerException;
+import com.cly.security.UserInfo;
+import com.cly.security.UserInfoService; 
 
 public class LDAPUserInfoService implements UserInfoService {
 

@@ -13,18 +13,64 @@ import com.cly.comm.client.http.HttpRequestParam;
 import com.cly.comm.util.IDUtil;
 import com.cly.comm.util.JSONUtil;
 import com.cly.security.server.SecurityServiceMgr;
-import com.cly.security.user.UserInfo;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 import net.sf.json.JSONObject;
 
-import com.cly.security.cnst.SecuConst;
-import com.cly.security.server.SecurityServerException;
+import com.cly.security.SecuConst;
+import com.cly.security.SecurityServerException;
+import com.cly.security.UserInfo;
 
 @Singleton
 @Path("/user")
 public class User {
+
+	private static final String ERR_MSG_INVALIDATE_USER_OR_AUTHCODE = "Invalidate User or Auth Code.";
+	private static final String ERR_MSG_INVALIDATE_INQ_AUTHCODE = "Invalidate Inquire Auth Code.";
+
+	@POST
+	@Path("/validate")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String validate(@FormParam(HttpRequestParam.REQ_JSON_MESSAGE_NAME) String jsonMsg) {
+
+		try {
+
+			JSONObject msg = JSONObject.fromObject(jsonMsg);
+
+			String userId = JSONUtil.getString(msg, SecuConst.USER_ID);
+
+			String authCode = JSONUtil.getString(msg, SecuConst.AUTH_CODE);
+
+			Cache sessCache = CacheMgr.getCache(SecuConst.AUTH_CODE_CACHE);
+
+			UserInfo ui = (UserInfo) sessCache.get(authCode).getObjectValue();
+
+			if (ui == null) {
+
+				KeyValue kvs = SecurityServiceMgr.getKVService();
+
+				String uif = kvs.get(this.getKVAuthCodeName(authCode));
+
+				if (uif == null)
+					throw new SecurityServerException("", ERR_MSG_INVALIDATE_USER_OR_AUTHCODE);
+
+				SessionUserInfo sui = new SessionUserInfo(uif);
+				ui = sui;
+				sessCache.put(new Element(ui.getAuthCode(), ui));
+
+			}
+
+			if (!ui.getUserId().equals(userId) && !ui.getAuthCode().equals(authCode))
+				throw new SecurityServerException("", ERR_MSG_INVALIDATE_USER_OR_AUTHCODE);
+
+			return JSONUtil.initSuccess().toString();
+
+		} catch (SecurityServerException e) {
+			return JSONUtil.initFailed(e).toString();
+		}
+
+	}
 
 	@POST
 	@Path("/inqAuthCode")
@@ -33,29 +79,27 @@ public class User {
 
 		try {
 
-			String errMsg = "Invalidate Inquire Auth Code.";
-			
 			JSONObject msg = JSONObject.fromObject(jsonMsg);
 
 			KeyValue kvs = SecurityServiceMgr.getKVService();
-			
-			String inqAuthCode=JSONUtil.getString(msg, SecuConst.AUTH_INQ_CODE);
-						
+
+			String inqAuthCode = JSONUtil.getString(msg, SecuConst.AUTH_INQ_CODE);
+
 			String authCode = kvs.get(this.getKVInqAuthCodeName(inqAuthCode));
-			
+
 			if (authCode == null)
-				throw new SecurityServerException("", errMsg);
+				throw new SecurityServerException("", ERR_MSG_INVALIDATE_INQ_AUTHCODE);
 
 			Cache sessCache = CacheMgr.getCache(SecuConst.AUTH_CODE_CACHE);
 
-			UserInfo ui=(UserInfo)sessCache.get(authCode).getObjectValue();  
+			UserInfo ui = (UserInfo) sessCache.get(authCode).getObjectValue();
 
 			if (ui == null) {
 
 				String uif = kvs.get(this.getKVAuthCodeName(authCode));
 
 				if (uif == null)
-					throw new SecurityServerException("", errMsg);
+					throw new SecurityServerException("", ERR_MSG_INVALIDATE_INQ_AUTHCODE);
 
 				SessionUserInfo sui = new SessionUserInfo(uif);
 				ui = sui;
@@ -63,13 +107,13 @@ public class User {
 
 			}
 
-			String userId=JSONUtil.getString(msg, SecuConst.USER_ID);
+			String userId = JSONUtil.getString(msg, SecuConst.USER_ID);
 			if (!ui.getUserId().equals(userId))
-				throw new SecurityServerException("", errMsg);
-			
+				throw new SecurityServerException("", ERR_MSG_INVALIDATE_INQ_AUTHCODE);
+
 			kvs.delete(this.getKVInqAuthCodeName(inqAuthCode));
-			
-			JSONObject jr=JSONUtil.initSuccess();
+
+			JSONObject jr = JSONUtil.initSuccess();
 			jr.put(SecuConst.AUTH_CODE, ui.getAuthCode());
 			return jr.toString();
 
@@ -117,12 +161,12 @@ public class User {
 			sessCache.put(new Element(ui.getAuthCode(), sui));
 
 			KeyValue kvs = SecurityServiceMgr.getKVService();
-			
+
 			kvs.set(this.getKVAuthCodeName(ui.getAuthCode()), sui.toJSONString(), 30 * 60);
 
 			String inqCode = IDUtil.getRandomBase64UUID();
 
-			kvs.set(this.getKVInqAuthCodeName(inqCode), ui.getAuthCode(), 30*60);
+			kvs.set(this.getKVInqAuthCodeName(inqCode), ui.getAuthCode(), 30);
 
 			JSONObject resMsg = JSONUtil.initSuccess();
 

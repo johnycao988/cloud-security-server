@@ -2,7 +2,8 @@ package com.cly.security.password;
 
 import org.junit.Test;
 
-import com.cly.security.server.SecurityServerException;
+import com.cly.security.SecurityServerException;
+import com.cly.security.service.impl.MD5EncryptService;
 
 import junit.framework.Assert;
 

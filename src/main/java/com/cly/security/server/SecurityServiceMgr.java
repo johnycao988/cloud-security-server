@@ -1,14 +1,13 @@
 package com.cly.security.server;
 
-import java.io.IOException;
 import java.util.Properties;
-
 import com.cly.cache.CacheMgr;
 import com.cly.cache.KeyValue;
 import com.cly.comm.client.config.ConfigClient;
 import com.cly.logging.CLYLoggerManager;
-import com.cly.security.password.PasswordEncrypt;
-import com.cly.security.user.UserInfoService;
+import com.cly.security.PasswordEncrypt;
+import com.cly.security.SecurityServerException;
+import com.cly.security.UserInfoService;
 
 public class SecurityServiceMgr {
 
@@ -99,6 +98,7 @@ public class SecurityServiceMgr {
 			return Class.forName(className).newInstance();
 
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new SecurityServerException(e, null, "Service:" + propName + " failed to initial.");
 		}
 	}
