@@ -108,13 +108,12 @@ public class User {
 			}
 
 			String userId = JSONUtil.getString(msg, SecuConst.USER_ID);
-			if (!ui.getUserId().equals(userId))
-				throw new SecurityServerException("", ERR_MSG_INVALIDATE_INQ_AUTHCODE);
-
+			
 			kvs.delete(this.getKVInqAuthCodeName(inqAuthCode));
 
 			JSONObject jr = JSONUtil.initSuccess();
 			jr.put(SecuConst.AUTH_CODE, ui.getAuthCode());
+			jr.put(SecuConst.USER_ID, userId);
 			return jr.toString();
 
 		} catch (SecurityServerException e) {

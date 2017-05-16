@@ -9,10 +9,11 @@ CONFIG.SERVER.AUTH.CODE=AUTHCODE-0001
 CONFIG.SERVER.URL=http://10.39.101.226:6069/cloud-config-server/GetConfigFile
 CONFIG.SERVER.ROOT.PATH=/AppConfig/dev
 
+
 #Properties file path in Config Server
 /cloud.security.server.properties 
 /cloud.security.server.cache.xml
-
+/cloud.security.client.properties ### for security client
 #Jenkins 
 
 1. define Propagate environment variables:
@@ -23,4 +24,10 @@ $mvn clean
 $mvn package 
 $docker -H 10.39.101.226:2375 cp $WORKSPACE/target/cloud-config-server.war cloud.config.server:usr/local/tomcat/webapps
 $docker -H 10.39.101.226:2375 restart cloud.config.server
+
+#Security client ####
+
+
+
+
  
