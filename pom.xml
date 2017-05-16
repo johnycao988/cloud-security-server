@@ -9,31 +9,16 @@
 	<packaging>war</packaging>
 
 	<dependencies>
-		<dependency>
+	<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.2</version>
 			<scope>test</scope>
 		</dependency>
-
-
-		<dependency>
-			<groupId>javax</groupId>
-			<artifactId>javaee-web-api</artifactId>
-			<version>7.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.glassfish.jersey.bundles</groupId>
-			<artifactId>jaxrs-ri</artifactId>
-			<version>2.25.1</version>
-		</dependency> 
-
-
 		<dependency>
 			<groupId>com.cly</groupId>
 			<artifactId>comm-lib</artifactId>
-			<version>1.1</version>
+			<version>1.12</version>
 		</dependency>
 	</dependencies>
 	<build>

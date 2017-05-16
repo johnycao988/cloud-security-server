@@ -2,7 +2,7 @@ package com.cly.security.password;
 
 import org.junit.Test;
 
-import com.cly.security.SecurityServerException;
+import com.cly.security.SecurityAuthException;
 import com.cly.security.service.impl.MD5EncryptService;
 
 import junit.framework.Assert;
@@ -10,7 +10,7 @@ import junit.framework.Assert;
 public class PasswordTest {
 	
 	@Test
-	public void testMD5() throws SecurityServerException {
+	public void testMD5() throws SecurityAuthException {
 		
 		String pwd="ldap123";
 		MD5EncryptService md5=new MD5EncryptService();

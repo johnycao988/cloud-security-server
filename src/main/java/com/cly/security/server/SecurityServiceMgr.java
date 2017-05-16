@@ -6,7 +6,7 @@ import com.cly.cache.KeyValue;
 import com.cly.comm.client.config.ConfigClient;
 import com.cly.logging.CLYLoggerManager;
 import com.cly.security.PasswordEncrypt;
-import com.cly.security.SecurityServerException;
+import com.cly.security.SecurityAuthException;
 import com.cly.security.UserInfoService;
 
 public class SecurityServiceMgr {
@@ -44,7 +44,7 @@ public class SecurityServiceMgr {
 		return "Security Server Refresh completed.";
 	}
 
-	public static UserInfoService getUserInfoService() throws SecurityServerException {
+	public static UserInfoService getUserInfoService() throws SecurityAuthException {
 
 		if (userInfoService == null) {
 			userInfoService = (UserInfoService) createServiceInstance("cloud.security.userinfo.service");
@@ -59,7 +59,7 @@ public class SecurityServiceMgr {
 
 	}
 
-	public static KeyValue getKVService() throws SecurityServerException {
+	public static KeyValue getKVService() throws SecurityAuthException {
 
 		if (kvService == null) {
 
@@ -73,7 +73,7 @@ public class SecurityServiceMgr {
 
 	}
 
-	public static PasswordEncrypt getPasswordEncryptService() throws SecurityServerException {
+	public static PasswordEncrypt getPasswordEncryptService() throws SecurityAuthException {
 
 		if (pwdEncryptService == null) {
 			pwdEncryptService = (PasswordEncrypt) createServiceInstance("cloud.security.password.encrypt.service");
@@ -83,7 +83,7 @@ public class SecurityServiceMgr {
 
 	}
 
-	private static Object createServiceInstance(String propName) throws SecurityServerException {
+	private static Object createServiceInstance(String propName) throws SecurityAuthException {
 
 		try {
 
@@ -92,14 +92,14 @@ public class SecurityServiceMgr {
 			String className = p.getProperty(propName);
 
 			if (className == null) {
-				throw new SecurityServerException(null, "Property:[" + propName + "] is not set.");
+				throw new SecurityAuthException(null, "Property:[" + propName + "] is not set.");
 			}
 
 			return Class.forName(className).newInstance();
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new SecurityServerException(e, null, "Service:" + propName + " failed to initial.");
+			throw new SecurityAuthException(e, null, "Service:" + propName + " failed to initial.");
 		}
 	}
 

@@ -22,9 +22,9 @@
 
     <div class="row marketing">
         <div class="col-lg-10">
-             <form class="form-horizontal" method="post" action="${pageContext.request.contextPath}/rest/user/pageLogin"> 
+             <form class="form-horizontal" method="post" action="${pageContext.request.contextPath}/rest/user/redirectPageLogin"> 
   
-                <input type="hidden" name="AUTH_REDIRECT_URL" value="<%=request.getParameter("AUTH_REDIRECT_URL") %>">
+                <input type="hidden" name="authRedirectUrl" value="<%=request.getParameter("authRedirectUrl") %>">
                 
                 <div class="form-group">
                     <label for="username" class="col-sm-4 control-label">User Id</label>
