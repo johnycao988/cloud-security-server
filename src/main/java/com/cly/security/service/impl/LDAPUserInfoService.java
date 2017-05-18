@@ -1,23 +1,32 @@
 package com.cly.security.service.impl;
 
 import java.io.Serializable;
-import java.util.Properties; 
+import java.util.ArrayList;
+import java.util.Properties;
 import javax.naming.NamingException;
-import javax.naming.directory.Attributes; 
+import javax.naming.directory.Attribute;
+import javax.naming.directory.Attributes;
+import javax.naming.directory.SearchControls;
+
 import com.cly.comm.util.IDUtil;
 import com.cly.ldap.LDAPContext;
 import com.cly.ldap.LDAPSearch;
 import com.cly.security.PasswordEncrypt;
 import com.cly.security.SecurityAuthException;
 import com.cly.security.UserInfo;
-import com.cly.security.UserInfoService; 
+import com.cly.security.UserInfoService;
 
 public class LDAPUserInfoService implements UserInfoService {
 
-	private String userinfoSearchbase;
+	private String ldapUserinfoSearchbase;
 	private String ldapUserId;
 	private String ldapUserPwd;
 	private String ldapUserName;
+
+	private String ldapUserGrpId;
+	private String ldapUserGrpUserId;
+	private String ldapUserGrpSearchbase;
+
 	private static final String ERR_MSG_INVALIDATE_USER_PWD = "Invalidate user or password.";
 	private PasswordEncrypt pwdEncrypteService;
 	LDAPSearch ldapSearch;
@@ -26,11 +35,12 @@ public class LDAPUserInfoService implements UserInfoService {
 	public UserInfo login(String userId, String userPwd) throws SecurityAuthException {
 
 		try {
-	
+
 			if (userId == null || userPwd == null)
 				throw new SecurityAuthException("", ERR_MSG_INVALIDATE_USER_PWD);
 
-			Attributes atr = this.ldapSearch.search(userinfoSearchbase, ldapUserId + "=" + userId);
+			Attributes atr = this.ldapSearch.search(ldapUserinfoSearchbase, ldapUserId + "=" + userId,
+					SearchControls.SUBTREE_SCOPE);
 
 			if (atr == null)
 				throw new SecurityAuthException("", ERR_MSG_INVALIDATE_USER_PWD);
@@ -46,7 +56,8 @@ public class LDAPUserInfoService implements UserInfoService {
 			ui.setUserId(userId);
 			ui.setUserName(slUserName);
 			ui.setAuthCode(IDUtil.getRandomBase64UUID());
-			
+			ui.setUserGroups(this.getUserGroups(userId));
+
 			return ui;
 		} catch (SecurityAuthException se) {
 			throw se;
@@ -55,13 +66,47 @@ public class LDAPUserInfoService implements UserInfoService {
 		}
 	}
 
+	private String[] getUserGroups(String userId) throws NamingException {
+
+		ArrayList<String> grpList = new ArrayList<String>();
+
+		Attributes[] atrs = this.ldapSearch.multiSearch(this.ldapUserGrpSearchbase, this.ldapUserGrpId + "=*",
+				SearchControls.SUBTREE_SCOPE);
+
+		if (atrs == null || atrs.length <= 0)
+			return grpList.toArray(new String[0]);
+
+		for (Attributes atr : atrs) {
+
+			String um = this.ldapUserId + "=" + userId + "," + this.ldapUserinfoSearchbase;
+
+			String gid = atr.get(this.ldapUserGrpId).get().toString();
+
+			Attribute at = atr.get(this.ldapUserGrpUserId);
+
+			for (int i = 0; i < at.size(); i++) {
+				if (at.get(i).toString().equals(um))
+					grpList.add(gid);
+
+			}
+
+		}
+
+		return grpList.toArray(new String[0]);
+
+	}
+
 	@Override
 	public void initProperties(Properties prop) throws SecurityAuthException {
 
-		userinfoSearchbase = prop.getProperty("ldap.user.search.base");
+		ldapUserinfoSearchbase = prop.getProperty("ldap.user.search.base");
 		ldapUserId = LDAPContext.getAttributeMapping(prop, "user.id");
 		ldapUserPwd = LDAPContext.getAttributeMapping(prop, "user.pwd");
 		ldapUserName = LDAPContext.getAttributeMapping(prop, "user.name");
+
+		this.ldapUserGrpSearchbase = prop.getProperty("ldap.user.group.search.base");
+		this.ldapUserGrpId = LDAPContext.getAttributeMapping(prop, "group.id");
+		this.ldapUserGrpUserId = LDAPContext.getAttributeMapping(prop, "group.user.id");
 
 		initLdapSearch(prop);
 
@@ -101,7 +146,7 @@ class UserInfoImpl implements UserInfo, Serializable {
 	private String userName;
 
 	private String authCode;
-	
+
 	private String[] listGrp;
 
 	@Override
@@ -130,17 +175,14 @@ class UserInfoImpl implements UserInfo, Serializable {
 	public void setAuthCode(String authCode) {
 		this.authCode = authCode;
 	}
-	
+
 	public void setUserGroups(String[] listGrp) {
 		this.listGrp = listGrp;
 	}
 
 	@Override
 	public String[] getUserGroups() {
-		// TODO Auto-generated method stub
 		return listGrp;
 	}
-
  
-
 }
