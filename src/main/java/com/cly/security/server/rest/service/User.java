@@ -74,10 +74,12 @@ public class User {
 
 	private String accessPermmission(UserInfo ui, JSONObject jsonMsg) {
 
+	 	
 		JSONArray ja = JSONUtil.getJSONArray(jsonMsg, SecuConst.AUTH_USER_GROUPS);
 
 		String[] grpList = ui.getUserGroups();
-
+		
+	 	
 		if (grpList != null && grpList.length > 0 && ja != null && ja.size() > 0) {
 
 			for (int i = 0; i < ja.size(); i++) {
@@ -91,15 +93,13 @@ public class User {
 				}
 
 				if (!bc) {
-					 
-					return JSONUtil.initFailed("", "Failed to authorization.").toString();
+		 			return JSONUtil.initFailed("", "Failed to authorization.").toString();
 				}
 
 			}
 
 		}
-	 
-		return JSONUtil.initSuccess().toString();
+	 	return JSONUtil.initSuccess().toString();
 
 	}
 
@@ -118,8 +118,8 @@ public class User {
 	public String inqAuthCode(@FormParam(HttpRequestParam.REQ_JSON_MESSAGE_NAME) String jsonMsg) {
 
 		try {
-
-			JSONObject msg = JSONObject.fromObject(jsonMsg);
+			
+		 	JSONObject msg = JSONObject.fromObject(jsonMsg);
 
 			String inqAuthCode = JSONUtil.getString(msg, SecuConst.AUTH_INQ_CODE);
 
@@ -129,7 +129,7 @@ public class User {
 
 			JSONObject jr = JSONUtil.initSuccess();
 			jr.put(SecuConst.AUTH_CODE, ui.getAuthCode());
-			jr.put(SecuConst.USER_ID, ui.getUserId());
+			jr.put(SecuConst.USER_ID, ui.getUserId()); 
 			return jr.toString();
 
 		} catch (SecurityAuthException e) {

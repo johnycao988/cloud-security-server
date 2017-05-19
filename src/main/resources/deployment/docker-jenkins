@@ -3,6 +3,10 @@ docker run -d -p 10389:10389 --name ds.server enschede/apache-directory-server
 
 # create Redis Server docker container
 docker run -d -p 6379:6379 -v /docker/redis/redis.conf:/usr/local/etc/redis/redis.conf --name redis.server 10.39.101.226:5000/redis redis-server /usr/local/etc/redis/redis.conf
+
+# create Security Server docker-container;
+docker run -d -p 8099:8080 --name cloud.security.server  -v /AppConfig/dev/tomcat.conf:/usr/local/tomcat/conf 10.39.101.226:5000/tomcat
+
  
 # JVM Variables
 CONFIG.SERVER.AUTH.CODE=AUTHCODE-0001
