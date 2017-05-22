@@ -1,19 +1,32 @@
 version: 1
 
-dn: ou=users,dc=example,dc=com
-objectClass: top
-objectClass: organizationalUnit
-ou: users
-
-dn: uid=bill.wu,ou=users,dc=example,dc=com
+dn: uid=bin.bai,ou=users,dc=example,dc=com
 objectClass: top
 objectClass: inetOrgPerson
 objectClass: person
 objectClass: organizationalPerson
-cn: Bill Wu
-sn: Bill
-uid: bill.wu
+cn: Bin Bai
+sn: Bin
+uid: bin.bai
 userPassword:: e01ENX1yZEtJSE40VENZbWZVQlg2cHJ6KzZnPT0=
+
+dn: dc=example,dc=com
+objectclass: top
+objectclass: domain
+dc: example
+
+dn: ou=users,dc=example,dc=com
+objectClass: organizationalUnit
+objectClass: top
+ou: users
+
+dn: cn=admin,ou=userGroups,dc=example,dc=com
+objectClass: top
+objectClass: groupOfNames
+cn: admin
+member: uid=bin.bai,ou=users,dc=example,dc=com
+member: uid=bill.wu,ou=users,dc=example,dc=com
+member: uid=johnny.cao,ou=users,dc=example,dc=com
 
 dn: uid=johnny.cao,ou=users,dc=example,dc=com
 objectClass: top
@@ -25,13 +38,24 @@ sn: Johnny
 uid: johnny.cao
 userPassword:: e01ENX1yZEtJSE40VENZbWZVQlg2cHJ6KzZnPT0=
 
-dn: uid=bin.bai,ou=users,dc=example,dc=com
+dn: uid=bill.wu,ou=users,dc=example,dc=com
 objectClass: top
 objectClass: inetOrgPerson
 objectClass: person
 objectClass: organizationalPerson
-cn: Bin Bai
-sn: Bin
-uid: bin.bai
+cn: Bill Wu
+sn: Bill
+uid: bill.wu
 userPassword:: e01ENX1yZEtJSE40VENZbWZVQlg2cHJ6KzZnPT0=
+
+dn: cn=manager,ou=userGroups,dc=example,dc=com
+objectClass: top
+objectClass: groupOfNames
+cn: manager
+member: uid=johnny.cao,ou=users,dc=example,dc=com
+
+dn: ou=userGroups,dc=example,dc=com
+objectClass: top
+objectClass: organizationalUnit
+ou: userGroups
 
