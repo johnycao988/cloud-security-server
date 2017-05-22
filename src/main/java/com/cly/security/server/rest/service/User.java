@@ -219,7 +219,7 @@ public class User {
 
 			KeyValue kvs = SecurityServiceMgr.getKVService();
 
-			String sui = kvs.get(this.getKVAuthCodeName(this.getKVAuthCodeName(authCode)));
+			String sui = kvs.get(this.getKVAuthCodeName(authCode));
 
 			if (sui != null) {
 				ui = new SessionUserInfo(sui);

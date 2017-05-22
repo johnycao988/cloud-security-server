@@ -29,7 +29,30 @@ $mvn package
 $docker -H 10.39.101.226:2375 cp $WORKSPACE/target/cloud-config-server.war cloud.config.server:usr/local/tomcat/webapps
 $docker -H 10.39.101.226:2375 restart cloud.config.server
 
-#Security client ####
+#Security client -Filter####
+	ClientSecurityFilterService ssf = (ClientSecurityFilterService) ClientSecurityServiceManager
+					.getClientSecurityFilterService();
+
+			if (ssf.isInqAuthCodeRequest(request, response))
+				return;
+
+			if (!ssf.authenticateUser(request, response)) {
+
+				String loginUrl = ssf.getLoginUrl(request, response);
+
+				res.sendRedirect(loginUrl);
+
+				return;
+			} 
+			
+			String[] ug = { "manager", "admin1" };
+			if (!ssf.accessPermmission(request, response, ug)) {
+				System.out.println("Not  pass permmissions.");
+			} else
+				System.out.println("Pass permmissions.");
+
+			chain.doFilter(request, response);
+
 
 
 
