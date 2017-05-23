@@ -10,8 +10,7 @@ import javax.naming.directory.SearchControls;
 
 import com.cly.comm.util.IDUtil;
 import com.cly.ldap.LDAPContext;
-import com.cly.ldap.LDAPSearch;
-import com.cly.security.PasswordEncrypt;
+import com.cly.ldap.LDAPSearch; 
 import com.cly.security.SecurityAuthException;
 import com.cly.security.UserInfo;
 import com.cly.security.UserInfoService;
@@ -19,44 +18,33 @@ import com.cly.security.UserInfoService;
 public class LDAPUserInfoService implements UserInfoService {
 
 	private String ldapUserinfoSearchbase;
-	private String ldapUserId;
-	private String ldapUserPwd;
 	private String ldapUserName;
 
 	private String ldapUserGrpId;
 	private String ldapUserGrpUserId;
 	private String ldapUserGrpSearchbase;
+	private String ldapUserId;
 
-	private static final String ERR_MSG_INVALIDATE_USER_PWD = "Invalidate user or password.";
-	private PasswordEncrypt pwdEncrypteService;
-	LDAPSearch ldapSearch;
+ 	private LDAPContext ldapCtx;
 
 	@Override
 	public UserInfo login(String userId, String userPwd) throws SecurityAuthException {
 
 		try {
 
-			if (userId == null || userPwd == null)
-				throw new SecurityAuthException("", ERR_MSG_INVALIDATE_USER_PWD);
-
-			Attributes atr = this.ldapSearch.search(ldapUserinfoSearchbase, ldapUserId + "=" + userId,
-					SearchControls.SUBTREE_SCOPE);
-
-			if (atr == null)
-				throw new SecurityAuthException("", ERR_MSG_INVALIDATE_USER_PWD);
-
-			String slUserPwd = new String((byte[]) atr.get(this.ldapUserPwd).get());
-
+	    	LDAPSearch ldapSearch = this.getLDAPSearch(userId, userPwd);
+			
+			Attributes atr = ldapSearch.search(ldapUserinfoSearchbase, ldapUserId + "=" + userId,
+					SearchControls.SUBTREE_SCOPE); 
+		 
 			String slUserName = atr.get(this.ldapUserName).get().toString();
-
-			if (!this.pwdEncrypteService.encrypt(userPwd).equals(slUserPwd))
-				throw new SecurityAuthException("", ERR_MSG_INVALIDATE_USER_PWD);
-
+ 
 			UserInfoImpl ui = new UserInfoImpl();
 			ui.setUserId(userId);
+			ui.setUserPassword(userPwd);
 			ui.setUserName(slUserName);
 			ui.setAuthCode(IDUtil.getRandomBase64UUID());
-			ui.setUserGroups(this.getUserGroups(userId));
+			ui.setUserGroups(this.getUserGroups(ldapSearch,userId));
 
 			return ui;
 		} catch (SecurityAuthException se) {
@@ -66,11 +54,11 @@ public class LDAPUserInfoService implements UserInfoService {
 		}
 	}
 
-	private String[] getUserGroups(String userId) throws NamingException {
+	private String[] getUserGroups(LDAPSearch ldapSearch,String userId) throws NamingException {
 
-		ArrayList<String> grpList = new ArrayList<String>();
+		ArrayList<String> grpList = new ArrayList<String>(); 
 
-		Attributes[] atrs = this.ldapSearch.multiSearch(this.ldapUserGrpSearchbase, this.ldapUserGrpId + "=*",
+		Attributes[] atrs = ldapSearch.multiSearch(this.ldapUserGrpSearchbase, this.ldapUserGrpId + "=*",
 				SearchControls.SUBTREE_SCOPE);
 
 		if (atrs == null || atrs.length <= 0)
@@ -100,38 +88,44 @@ public class LDAPUserInfoService implements UserInfoService {
 	public void initProperties(Properties prop) throws SecurityAuthException {
 
 		ldapUserinfoSearchbase = prop.getProperty("ldap.user.search.base");
-		ldapUserId = LDAPContext.getAttributeMapping(prop, "user.id");
-		ldapUserPwd = LDAPContext.getAttributeMapping(prop, "user.pwd");
 		ldapUserName = LDAPContext.getAttributeMapping(prop, "user.name");
 
 		this.ldapUserGrpSearchbase = prop.getProperty("ldap.user.group.search.base");
 		this.ldapUserGrpId = LDAPContext.getAttributeMapping(prop, "group.id");
 		this.ldapUserGrpUserId = LDAPContext.getAttributeMapping(prop, "group.user.id");
+		ldapUserId=LDAPContext.getAttributeMapping(prop,"user.id");
+		
+		ldapCtx = new LDAPContext();
 
-		initLdapSearch(prop);
+		ldapCtx.setFactory(prop.getProperty("ldap.initial.context.factory"))
+				.setSecurityAuthentication(prop.getProperty("ldap.context.security.authentication"))
+				.setServerUrl(prop.getProperty("ldap.server.url"));
 
 	}
 
-	private void initLdapSearch(Properties p) throws SecurityAuthException {
+	private LDAPSearch getLDAPSearch(String userId, String password) throws SecurityAuthException {
 
 		try {
-			LDAPContext ctx = new LDAPContext();
-			ctx.setFactory(p.getProperty("ldap.initial.context.factory"))
-					.setPassword(p.getProperty("ldap.server.password"))
-					.setSecurityAuthentication(p.getProperty("ldap.context.security.authentication"))
-					.setServerUrl(p.getProperty("ldap.server.url")).setUser(p.getProperty("ldap.server.username"));
-			this.ldapSearch = new LDAPSearch(ctx);
+
+			LDAPContext ctx = new LDAPContext(this.ldapCtx.getProperties()); 
+		 	
+			String ui=this.ldapUserId+"="+userId+","+this.ldapUserinfoSearchbase;			
+
+			ctx.setUser(ui);
+
+			ctx.setPassword(password);
+
+			LDAPSearch ldapSearch = new LDAPSearch(ctx);
+
+			return ldapSearch;
 		} catch (Exception e) {
-			throw new SecurityAuthException(e, null, "failed to initial LDAP Search service.");
+
+			throw new SecurityAuthException(e, "", "Invalidate User Id or Password.");
+
 		}
 
 	}
 
-	@Override
-	public void setPasswordEncryptService(PasswordEncrypt pwdService) {
-		this.pwdEncrypteService = pwdService;
-
-	}
 }
 
 class UserInfoImpl implements UserInfo, Serializable {
@@ -146,6 +140,8 @@ class UserInfoImpl implements UserInfo, Serializable {
 	private String userName;
 
 	private String authCode;
+
+	private String userPwd;
 
 	private String[] listGrp;
 
@@ -180,9 +176,18 @@ class UserInfoImpl implements UserInfo, Serializable {
 		this.listGrp = listGrp;
 	}
 
+	public void setUserPassword(String userPwd) {
+		this.userPwd = userPwd;
+	}
+
 	@Override
 	public String[] getUserGroups() {
 		return listGrp;
 	}
- 
+
+	@Override
+	public String getUserPassword() { 
+		return userPwd;
+	}
+
 }

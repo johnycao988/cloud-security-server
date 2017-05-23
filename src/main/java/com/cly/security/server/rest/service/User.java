@@ -303,12 +303,16 @@ class SessionUserInfo implements UserInfo {
 	private String userName;
 	private String authCode;
 	private String[] grpList;
-
+	private String userPwd;
+	
 	public SessionUserInfo(UserInfo ui) {
+		
 		this.userId = ui.getUserId();
+		this.userPwd=ui.getUserPassword();
 		this.userName = ui.getUserName();
 		this.authCode = ui.getAuthCode();
 		this.grpList = ui.getUserGroups();
+		
 	}
 
 	public SessionUserInfo(String jsonUI) {
@@ -356,6 +360,12 @@ class SessionUserInfo implements UserInfo {
 	@Override
 	public String[] getUserGroups() {
 		return this.grpList;
+	}
+
+	@Override
+	public String getUserPassword() {
+		// TODO Auto-generated method stub
+		return this.userPwd;
 	}
 
 }

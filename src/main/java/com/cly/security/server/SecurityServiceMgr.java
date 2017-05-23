@@ -4,16 +4,14 @@ import java.util.Properties;
 import com.cly.cache.CacheMgr;
 import com.cly.cache.KeyValue;
 import com.cly.comm.client.config.ConfigClient;
-import com.cly.logging.CLYLoggerManager;
-import com.cly.security.PasswordEncrypt;
+import com.cly.logging.CLYLoggerManager; 
 import com.cly.security.SecurityAuthException;
 import com.cly.security.UserInfoService;
 
 public class SecurityServiceMgr {
 
 	private static Properties securityProperties = null;
-	private static UserInfoService userInfoService = null;
-	private static PasswordEncrypt pwdEncryptService = null;
+	private static UserInfoService userInfoService = null; 
 	private static KeyValue kvService;
 
 	private SecurityServiceMgr() {
@@ -37,8 +35,7 @@ public class SecurityServiceMgr {
 
 	public static String refresh(){
 		securityProperties = null;
-		userInfoService = null;
-		pwdEncryptService = null;
+		userInfoService = null; 
 		kvService = null;
 		initSecurityCache();
 		return "Security Server Refresh completed.";
@@ -47,11 +44,11 @@ public class SecurityServiceMgr {
 	public static UserInfoService getUserInfoService() throws SecurityAuthException {
 
 		if (userInfoService == null) {
+			
 			userInfoService = (UserInfoService) createServiceInstance("cloud.security.userinfo.service");
 
 			userInfoService.initProperties(getProperties());
-
-			userInfoService.setPasswordEncryptService(getPasswordEncryptService());
+ 
 
 		}
 
@@ -73,15 +70,7 @@ public class SecurityServiceMgr {
 
 	}
 
-	public static PasswordEncrypt getPasswordEncryptService() throws SecurityAuthException {
-
-		if (pwdEncryptService == null) {
-			pwdEncryptService = (PasswordEncrypt) createServiceInstance("cloud.security.password.encrypt.service");
-		}
-
-		return pwdEncryptService;
-
-	}
+ 
 
 	private static Object createServiceInstance(String propName) throws SecurityAuthException {
 
