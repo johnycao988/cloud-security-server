@@ -94,7 +94,7 @@ public class SecurityServiceMgr {
 
 	public static void initSecurityCache() {
 		try {
-			CacheMgr.init(ConfigClient.getInputStream("cloud.security.server.cache.xml"));
+			CacheMgr.init(ConfigClient.getInputStream("/cloud.security/cloud.security.server.cache.xml"));
 		} catch (Exception e) {
 
 			CLYLoggerManager.getRootLogger().fatalException(e);
