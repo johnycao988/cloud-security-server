@@ -12,7 +12,8 @@ public class SecurityServiceMgr {
 
 	private static Properties securityProperties = null;
 	private static UserInfoService userInfoService = null; 
-	private static KeyValue kvService;
+	private static KeyValue kvService; 
+	
 
 	private SecurityServiceMgr() {
 
@@ -22,7 +23,7 @@ public class SecurityServiceMgr {
 
 		try {
 			if (securityProperties == null)
-				securityProperties = ConfigClient.getProperties("cloud.security.server.properties");
+				securityProperties = ConfigClient.getProperties("/cloud.security/cloud.security.server.properties");
 			return securityProperties;
 		} catch (Exception e) {
 
