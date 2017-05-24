@@ -4,16 +4,17 @@ import java.util.Properties;
 import com.cly.cache.CacheMgr;
 import com.cly.cache.KeyValue;
 import com.cly.comm.client.config.ConfigClient;
-import com.cly.logging.CLYLoggerManager; 
+import com.cly.logging.CLYLoggerManager;
 import com.cly.security.SecurityAuthException;
 import com.cly.security.UserInfoService;
 
 public class SecurityServiceMgr {
 
 	private static Properties securityProperties = null;
-	private static UserInfoService userInfoService = null; 
-	private static KeyValue kvService; 
 	
+	private static UserInfoService userInfoService = null;
+	
+	private static KeyValue kvService;
 
 	private SecurityServiceMgr() {
 
@@ -22,34 +23,43 @@ public class SecurityServiceMgr {
 	public static Properties getProperties() {
 
 		try {
+
 			if (securityProperties == null)
 				securityProperties = ConfigClient.getProperties("/cloud.security/cloud.security.server.properties");
+
 			return securityProperties;
+
 		} catch (Exception e) {
 
 			CLYLoggerManager.getRootLogger().fatalException(e);
+
 			securityProperties = new Properties();
+
 			return securityProperties;
 		}
 
 	}
 
-	public static String refresh(){
+	public static String refresh() {
+
 		securityProperties = null;
-		userInfoService = null; 
+
+		userInfoService = null;
+
 		kvService = null;
+
 		initSecurityCache();
+
 		return "Security Server Refresh completed.";
 	}
 
 	public static UserInfoService getUserInfoService() throws SecurityAuthException {
 
 		if (userInfoService == null) {
-			
+
 			userInfoService = (UserInfoService) createServiceInstance("cloud.security.userinfo.service");
 
 			userInfoService.initProperties(getProperties());
- 
 
 		}
 
@@ -70,8 +80,6 @@ public class SecurityServiceMgr {
 		return kvService;
 
 	}
-
- 
 
 	private static Object createServiceInstance(String propName) throws SecurityAuthException {
 
@@ -94,11 +102,15 @@ public class SecurityServiceMgr {
 	}
 
 	public static void initSecurityCache() {
+
 		try {
+
 			CacheMgr.init(ConfigClient.getInputStream("/cloud.security/cloud.security.server.cache.xml"));
+
 		} catch (Exception e) {
 
 			CLYLoggerManager.getRootLogger().fatalException(e);
+
 		}
 	}
 

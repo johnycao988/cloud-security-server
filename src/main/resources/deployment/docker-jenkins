@@ -29,29 +29,16 @@ $mvn package
 $docker -H 10.39.101.226:2375 cp $WORKSPACE/target/cloud-config-server.war cloud.config.server:usr/local/tomcat/webapps
 $docker -H 10.39.101.226:2375 restart cloud.config.server
 
-#Security client -Filter####
-	ClientSecurityFilterService ssf = (ClientSecurityFilterService) ClientSecurityServiceManager
-					.getClientSecurityFilterService();
+#Ansible -Jenkins 
 
-			if (ssf.isInqAuthCodeRequest(request, response))
-				return;
+$mvn clean
 
-			if (!ssf.authenticateUser(request, response)) {
+$mvn package 
 
-				String loginUrl = ssf.getLoginUrl(request, response);
+cp $WORKSPACE/target/cloud-batch.war $WORKSPACE/src/main/ansible
 
-				res.sendRedirect(loginUrl);
-
-				return;
-			} 
-			
-			String[] ug = { "manager", "admin1" };
-			if (!ssf.accessPermmission(request, response, ug)) {
-				System.out.println("Not  pass permmissions.");
-			} else
-				System.out.println("Pass permmissions.");
-
-			chain.doFilter(request, response);
+ansible-playbook $WORKSPACE/src/main/ansible/ansible.yml
+ 
 
 
 

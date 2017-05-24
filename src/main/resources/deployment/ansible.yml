@@ -1,0 +1,18 @@
+---
+- hosts: webservers
+  remote_user: jenkins
+  tasks:
+  - name: Stop CS Batch containers...
+    shell: docker stop tomcat.batch.server-001 tomcat.batch.service-001
+
+  - name: Copy Batch Ear....
+    copy: src=cloud-batch.war dest=/tmp
+
+  - name: Copy ear to docker tomcat.batch.service-001 container...
+    shell: docker cp /tmp/cloud-batch.war tomcat.batch.service-001:usr/local/tomcat/webapps
+
+  - name: Copy ear to docker tomcat.batch.server-001 container..
+    shell: docker cp /tmp/cloud-batch.war tomcat.batch.server-001:usr/local/tomcat/webapps
+
+  - name: Start CS Batch containers...
+    shell: docker start tomcat.batch.server-001 tomcat.batch.service-001
