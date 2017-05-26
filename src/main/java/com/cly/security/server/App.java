@@ -19,7 +19,7 @@ public class App extends ResourceConfig {
 
 		packages("com.cly.security.server.rest.service"); 
 
-		SecurityServiceMgr.initSecurityCache(); 
+		SecurityServiceMgr.init(); 
 		
 	}
 

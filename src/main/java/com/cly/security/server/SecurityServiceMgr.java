@@ -4,6 +4,9 @@ import java.util.Properties;
 import com.cly.cache.CacheMgr;
 import com.cly.cache.KeyValue;
 import com.cly.comm.client.config.ConfigClient;
+import com.cly.err.ErrorHandler;
+import com.cly.err.ErrorHandlerMgr;
+import com.cly.logging.CLYLogger;
 import com.cly.logging.CLYLoggerManager;
 import com.cly.security.SecurityAuthException;
 import com.cly.security.UserInfoService;
@@ -11,9 +14,9 @@ import com.cly.security.UserInfoService;
 public class SecurityServiceMgr {
 
 	private static Properties securityProperties = null;
-	
+
 	private static UserInfoService userInfoService = null;
-	
+
 	private static KeyValue kvService;
 
 	private SecurityServiceMgr() {
@@ -22,33 +25,14 @@ public class SecurityServiceMgr {
 
 	public static Properties getProperties() {
 
-		try {
-
-			if (securityProperties == null)
-				securityProperties = ConfigClient.getProperties("/cloud.security/cloud.security.server.properties");
-
-			return securityProperties;
-
-		} catch (Exception e) {
-
-			CLYLoggerManager.getRootLogger().fatalException(e);
-
-			securityProperties = new Properties();
-
-			return securityProperties;
-		}
-
+		return securityProperties;
 	}
 
 	public static String refresh() {
 
-		securityProperties = null;
-
-		userInfoService = null;
-
-		kvService = null;
-
-		initSecurityCache();
+		CLYLoggerManager.getRootLogger().info("Start to refresh security server configurations...");
+		
+		init();
 
 		return "Security Server Refresh completed.";
 	}
@@ -83,29 +67,56 @@ public class SecurityServiceMgr {
 
 	private static Object createServiceInstance(String propName) throws SecurityAuthException {
 
+		ErrorHandler eh = ErrorHandlerMgr.getErrorHandler();
+
+		Properties p = getProperties();
+
+		String className = p.getProperty(propName);
+
+		if (className == null) {
+			String errCode = "SECU-00002";
+			throw new SecurityAuthException(errCode, eh.getErrorMessage(errCode, propName));
+		}
+
 		try {
-
-			Properties p = getProperties();
-
-			String className = p.getProperty(propName);
-
-			if (className == null) {
-				throw new SecurityAuthException(null, "Property:[" + propName + "] is not set.");
-			}
 
 			return Class.forName(className).newInstance();
 
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new SecurityAuthException(e, null, "Service:" + propName + " failed to initial.");
+			String errCode = "SECU-00003";
+			throw new SecurityAuthException(errCode, eh.getErrorMessage(errCode, propName));
 		}
 	}
 
-	public static void initSecurityCache() {
+	public static void init() {
 
 		try {
 
+			securityProperties = null;
+
+			userInfoService = null;
+
+			kvService = null;
+
+			CLYLoggerManager.initPropertiesConfig(
+					ConfigClient.getInputStream("/cloud.security/cloud.security.server.log4j.properties"));
+
+			CLYLogger logger=CLYLoggerManager.getRootLogger();
+			
+			logger.info("Initializing Error Handler...");
+			ErrorHandlerMgr.clear();
+
+			ErrorHandlerMgr
+					.addConfigFile(ConfigClient.getInputStream("/cloud.security/cloud.security.err.handler.xml"));
+
+			logger.info("Initializing Cache...");
+			
 			CacheMgr.init(ConfigClient.getInputStream("/cloud.security/cloud.security.server.cache.xml"));
+
+			logger.info("Initializing Properties...");
+			securityProperties = ConfigClient.getProperties("/cloud.security/cloud.security.server.properties");
+
+			CLYLoggerManager.getRootLogger().info("Initialized completely.");
 
 		} catch (Exception e) {
 

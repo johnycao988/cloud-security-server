@@ -3,6 +3,7 @@ package com.cly.security.server.rest.service;
 import java.io.IOException;
 
 import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
@@ -17,6 +18,10 @@ import com.cly.comm.client.http.HttpRequestParam;
 import com.cly.comm.util.IDUtil;
 import com.cly.comm.util.JSONResult;
 import com.cly.comm.util.JSONUtil;
+import com.cly.err.ErrorHandler;
+import com.cly.err.ErrorHandlerMgr;
+import com.cly.logging.CLYLogger;
+import com.cly.logging.CLYLoggerManager;
 import com.cly.security.server.SecurityServiceMgr;
 
 import net.sf.ehcache.Cache;
@@ -32,19 +37,32 @@ import com.cly.security.UserInfo;
 @Path("/user")
 public class User {
 
-	private static final String ERR_MSG_INVALIDATE_USER_OR_AUTHCODE = "Invalidate User or Auth Code.";
-	private static final String ERR_MSG_INVALIDATE_INQ_AUTHCODE = "Invalidate Inquire Auth Code.";
+	
+	private CLYLogger logger = CLYLoggerManager.getRootLogger();
 
 	@POST
 	@Path("/authAccessPermmison")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String authAccessPermmison(@FormParam(HttpRequestParam.REQ_JSON_MESSAGE_NAME) String jsonMsg) {
+	public String authAccessPermmison(@Context HttpServletRequest request,
+			@FormParam(HttpRequestParam.REQ_JSON_MESSAGE_NAME) String jsonMsg) {
+
+		infoRequest(request, jsonMsg);
 
 		return validate(jsonMsg, true);
 
 	}
 
+	private void infoRequest(HttpServletRequest request, String info) {
+
+		String sm = "A request from " + request.getRemoteHost() + ":" + info;
+
+		logger.info(sm);
+
+	}
+
 	private String validate(String jsonMsg, boolean bAuthAccessPermmison) {
+
+		ErrorHandler eh = ErrorHandlerMgr.getErrorHandler();
 
 		try {
 
@@ -56,17 +74,18 @@ public class User {
 
 			UserInfo ui = this.getCacheUserInfo(authCode);
 
-			if (!ui.getUserId().equals(userId) && !ui.getAuthCode().equals(authCode))
-				throw new SecurityAuthException("", ERR_MSG_INVALIDATE_USER_OR_AUTHCODE);
+			if (!ui.getUserId().equals(userId) && !ui.getAuthCode().equals(authCode)) {
+
+				String errCode = "SECU-00001";
+				throw new SecurityAuthException(errCode, eh.getErrorMessage(errCode));
+			}
 
 			if (!bAuthAccessPermmison)
 				return JSONUtil.initSuccess().toString();
 			else
 				return accessPermmission(ui, msg);
 
-		} catch (
-
-		SecurityAuthException e) {
+		} catch (SecurityAuthException e) {
 			return JSONUtil.initFailed(e).toString();
 		}
 
@@ -74,40 +93,40 @@ public class User {
 
 	private String accessPermmission(UserInfo ui, JSONObject jsonMsg) {
 
-	 	
 		JSONArray ja = JSONUtil.getJSONArray(jsonMsg, SecuConst.AUTH_USER_GROUPS);
 
 		String[] grpList = ui.getUserGroups();
-		
-	 	
+
 		if (grpList != null && grpList.length > 0 && ja != null && ja.size() > 0) {
 
 			for (int i = 0; i < ja.size(); i++) {
 				boolean bc = false;
 				String sc = ja.getString(i);
 				for (String sg : grpList) {
-					if(sc.equals(sg)) {
+					if (sc.equals(sg)) {
 						bc = true;
 						break;
 					}
 				}
 
 				if (!bc) {
-		 			return JSONUtil.initFailed("", "Failed to authorization.").toString();
+					return JSONUtil.initFailed("", "Failed to authorization.").toString();
 				}
 
 			}
 
 		}
-	 	return JSONUtil.initSuccess().toString();
+		return JSONUtil.initSuccess().toString();
 
 	}
 
 	@POST
 	@Path("/validate")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String validate(@FormParam(HttpRequestParam.REQ_JSON_MESSAGE_NAME) String jsonMsg) {
+	public String validate(@Context HttpServletRequest request,
+			@FormParam(HttpRequestParam.REQ_JSON_MESSAGE_NAME) String jsonMsg) {
 
+		this.infoRequest(request, jsonMsg);
 		return validate(jsonMsg, false);
 
 	}
@@ -115,11 +134,14 @@ public class User {
 	@POST
 	@Path("/inqAuthCode")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String inqAuthCode(@FormParam(HttpRequestParam.REQ_JSON_MESSAGE_NAME) String jsonMsg) {
+	public String inqAuthCode(@Context HttpServletRequest request,
+			@FormParam(HttpRequestParam.REQ_JSON_MESSAGE_NAME) String jsonMsg) {
 
 		try {
-			
-		 	JSONObject msg = JSONObject.fromObject(jsonMsg);
+
+			this.infoRequest(request, jsonMsg);
+
+			JSONObject msg = JSONObject.fromObject(jsonMsg);
 
 			String inqAuthCode = JSONUtil.getString(msg, SecuConst.AUTH_INQ_CODE);
 
@@ -129,7 +151,7 @@ public class User {
 
 			JSONObject jr = JSONUtil.initSuccess();
 			jr.put(SecuConst.AUTH_CODE, ui.getAuthCode());
-			jr.put(SecuConst.USER_ID, ui.getUserId()); 
+			jr.put(SecuConst.USER_ID, ui.getUserId());
 			return jr.toString();
 
 		} catch (SecurityAuthException e) {
@@ -141,9 +163,11 @@ public class User {
 	@POST
 	@Path("/redirectPageLogin")
 	@Produces(MediaType.APPLICATION_JSON)
-	public void directPageLogin(@FormParam(SecuConst.USER_ID) String userId,
+	public void directPageLogin(@Context HttpServletRequest request, @FormParam(SecuConst.USER_ID) String userId,
 			@FormParam(SecuConst.USER_PW) String userPwd, @FormParam(SecuConst.AUTH_REDIRECT_URL) String redirectUrl,
 			@Context HttpServletResponse response) throws IOException {
+
+		this.infoRequest(request, "Login - User Id:" + userId + " Redirect page url:" + redirectUrl);
 
 		JSONResult jr = new JSONResult(login(userId, userPwd, redirectUrl));
 		if (jr.isSuccess()) {
@@ -163,19 +187,25 @@ public class User {
 	@POST
 	@Path("/pageLogin")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String pageLogin(@FormParam(SecuConst.USER_ID) String userId, @FormParam(SecuConst.USER_PW) String userPwd,
-			@FormParam(SecuConst.AUTH_REDIRECT_URL) String redirectUrl) {
+	public String pageLogin(@Context HttpServletRequest request, @FormParam(SecuConst.USER_ID) String userId,
+			@FormParam(SecuConst.USER_PW) String userPwd, @FormParam(SecuConst.AUTH_REDIRECT_URL) String redirectUrl) {
+
+		this.infoRequest(request, "page login - User Id:" + userId);
+
 		return login(userId, userPwd, redirectUrl);
 	}
 
 	@POST
 	@Path("/msgLogin")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String msgLogin(@FormParam(HttpRequestParam.REQ_JSON_MESSAGE_NAME) String jsonMsg) {
+	public String msgLogin(@Context HttpServletRequest request,
+			@FormParam(HttpRequestParam.REQ_JSON_MESSAGE_NAME) String jsonMsg) {
 
 		JSONObject msg = JSONObject.fromObject(jsonMsg);
 
 		String userId = JSONUtil.getString(msg, SecuConst.USER_ID);
+
+		this.infoRequest(request, " login msg - User Id:" + userId);
 
 		String userPwd = JSONUtil.getString(msg, SecuConst.USER_PW);
 
@@ -227,8 +257,11 @@ public class User {
 			}
 		}
 
-		if (ui == null)
-			throw new SecurityAuthException("", ERR_MSG_INVALIDATE_USER_OR_AUTHCODE);
+		if (ui == null) {
+			String errCode = "SECU-00004";
+			ErrorHandler eh = ErrorHandlerMgr.getErrorHandler();
+			throw new SecurityAuthException(errCode, eh.getErrorMessage(errCode));
+		}
 
 		return ui;
 	}
@@ -255,8 +288,13 @@ public class User {
 
 			return authCode;
 
-		} else
-			throw new SecurityAuthException("", ERR_MSG_INVALIDATE_INQ_AUTHCODE);
+		} else {
+
+			String errCode = "SECU-00005";
+			ErrorHandler eh = ErrorHandlerMgr.getErrorHandler();
+			throw new SecurityAuthException(errCode, eh.getErrorMessage(errCode));
+
+		}
 
 	}
 
@@ -304,15 +342,15 @@ class SessionUserInfo implements UserInfo {
 	private String authCode;
 	private String[] grpList;
 	private String userPwd;
-	
+
 	public SessionUserInfo(UserInfo ui) {
-		
+
 		this.userId = ui.getUserId();
-		this.userPwd=ui.getUserPassword();
+		this.userPwd = ui.getUserPassword();
 		this.userName = ui.getUserName();
 		this.authCode = ui.getAuthCode();
 		this.grpList = ui.getUserGroups();
-		
+
 	}
 
 	public SessionUserInfo(String jsonUI) {
