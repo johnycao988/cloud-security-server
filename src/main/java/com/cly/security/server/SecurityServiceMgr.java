@@ -75,7 +75,9 @@ public class SecurityServiceMgr {
 
 		if (className == null) {
 			String errCode = "SECU-00002";
-			throw new SecurityAuthException(errCode, eh.getErrorMessage(errCode, propName));
+			String errMsg=eh.getErrorMessage(errCode, propName);
+			CLYLoggerManager.getRootLogger().fatal(errMsg);
+			throw new SecurityAuthException(errCode, errMsg);
 		}
 
 		try {
@@ -84,7 +86,9 @@ public class SecurityServiceMgr {
 
 		} catch (Exception e) {
 			String errCode = "SECU-00003";
-			throw new SecurityAuthException(errCode, eh.getErrorMessage(errCode, propName));
+			String errMsg=eh.getErrorMessage(errCode, propName);
+			CLYLoggerManager.getRootLogger().fatal(errMsg);
+			throw new SecurityAuthException(e,errCode, errMsg);
 		}
 	}
 
