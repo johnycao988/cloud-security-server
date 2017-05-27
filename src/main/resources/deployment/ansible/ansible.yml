@@ -1,0 +1,15 @@
+---
+- hosts: webservers
+  remote_user: jenkins
+  tasks:
+  - name: Stop Cloud Security Server Containers...
+    shell: docker stop cloud.security.server
+
+  - name: Copy Cloud security server war....
+    copy: src=cloud-security-server.war dest=/tmp
+
+  - name: Copy war to docker containers...
+    shell: docker cp /tmp/cloud-security-server.war cloud.security.server:usr/local/tomcat/webapps 
+
+  - name: Start CS Security Server containers...
+    shell: docker start cloud.security.server
