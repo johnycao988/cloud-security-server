@@ -17,7 +17,7 @@ public class SecurityServiceMgr {
 
 	private static UserInfoService userInfoService = null;
 
-	private static KeyValue kvService;
+	private static KeyValue kvService; 
 
 	private SecurityServiceMgr() {
 
@@ -31,7 +31,7 @@ public class SecurityServiceMgr {
 	public static String refresh() {
 
 		CLYLoggerManager.getRootLogger().info("Start to refresh security server configurations...");
-		
+
 		init();
 
 		return "Security Server Refresh completed.";
@@ -75,7 +75,7 @@ public class SecurityServiceMgr {
 
 		if (className == null) {
 			String errCode = "SECU-00002";
-			String errMsg=eh.getErrorMessage(errCode, propName);
+			String errMsg = eh.getErrorMessage(errCode, propName);
 			CLYLoggerManager.getRootLogger().fatal(errMsg);
 			throw new SecurityAuthException(errCode, errMsg);
 		}
@@ -86,9 +86,9 @@ public class SecurityServiceMgr {
 
 		} catch (Exception e) {
 			String errCode = "SECU-00003";
-			String errMsg=eh.getErrorMessage(errCode, propName);
+			String errMsg = eh.getErrorMessage(errCode, propName);
 			CLYLoggerManager.getRootLogger().fatal(errMsg);
-			throw new SecurityAuthException(e,errCode, errMsg);
+			throw new SecurityAuthException(e, errCode, errMsg);
 		}
 	}
 
@@ -105,16 +105,17 @@ public class SecurityServiceMgr {
 			CLYLoggerManager.initPropertiesConfig(
 					ConfigClient.getInputStream("/cloud.security/cloud.security.server.log4j.properties"));
 
-			CLYLogger logger=CLYLoggerManager.getRootLogger();
-			
-			logger.info("Initializing Error Handler...");
-			ErrorHandlerMgr.clear();
+			CLYLogger logger = CLYLoggerManager.getRootLogger();
 
+			logger.info("Initializing Error Handler..."); 
+
+			ErrorHandlerMgr.clear();
 			ErrorHandlerMgr
-					.addConfigFile(ConfigClient.getInputStream("/cloud.security/cloud.security.err.handler.xml"));
+			.addConfigFile(ConfigClient.getInputStream("/cloud.security/cloud.security.err.handler.xml"));
+
 
 			logger.info("Initializing Cache...");
-			
+
 			CacheMgr.init(ConfigClient.getInputStream("/cloud.security/cloud.security.server.cache.xml"));
 
 			logger.info("Initializing Properties...");
