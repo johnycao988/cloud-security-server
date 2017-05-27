@@ -17,7 +17,7 @@ public class SecurityServiceMgr {
 
 	private static UserInfoService userInfoService = null;
 
-	private static KeyValue kvService; 
+	private static KeyValue kvService;
 
 	private SecurityServiceMgr() {
 
@@ -96,30 +96,13 @@ public class SecurityServiceMgr {
 
 		try {
 
-			securityProperties = null;
+			initLog();
 
-			userInfoService = null;
+			initErrorHandler();
 
-			kvService = null;
+			initCache();
 
-			CLYLoggerManager.initPropertiesConfig(
-					ConfigClient.getInputStream("/cloud.security/cloud.security.server.log4j.properties"));
-
-			CLYLogger logger = CLYLoggerManager.getRootLogger();
-
-			logger.info("Initializing Error Handler..."); 
-
-			ErrorHandlerMgr.clear();
-			ErrorHandlerMgr
-			.addConfigFile(ConfigClient.getInputStream("/cloud.security/cloud.security.err.handler.xml"));
-
-
-			logger.info("Initializing Cache...");
-
-			CacheMgr.init(ConfigClient.getInputStream("/cloud.security/cloud.security.server.cache.xml"));
-
-			logger.info("Initializing Properties...");
-			securityProperties = ConfigClient.getProperties("/cloud.security/cloud.security.server.properties");
+			initSecurityProperties();
 
 			CLYLoggerManager.getRootLogger().info("Initialized completely.");
 
@@ -128,6 +111,85 @@ public class SecurityServiceMgr {
 			CLYLoggerManager.getRootLogger().fatalException(e);
 
 		}
+	}
+
+	private static void initSecurityProperties() {
+		
+		try {
+
+			securityProperties = null;
+
+			userInfoService = null;
+
+			kvService = null;
+
+			CLYLogger logger = CLYLoggerManager.getRootLogger();
+
+			logger.info("Initializing Properties...");
+			securityProperties = ConfigClient.getProperties("/cloud.security/cloud.security.server.properties");
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+			CLYLoggerManager.getRootLogger().fatalException(e);
+
+		}
+	}
+
+	private static void initCache() {
+		try {
+
+			CLYLogger logger = CLYLoggerManager.getRootLogger();
+
+			logger.info("Initializing Cache...");
+
+			CacheMgr.init(ConfigClient.getInputStream("/cloud.security/cloud.security.server.cache.xml"));
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+			CLYLoggerManager.getRootLogger().fatalException(e);
+
+		}
+
+	}
+
+	private static void initErrorHandler() {
+		try {
+
+			CLYLogger logger = CLYLoggerManager.getRootLogger();
+
+			logger.info("Initializing Error Handler...");
+
+			ErrorHandlerMgr.clear();
+			ErrorHandlerMgr
+					.addConfigFile(ConfigClient.getInputStream("/cloud.security/cloud.security.err.handler.xml"));
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+			CLYLoggerManager.getRootLogger().fatalException(e);
+
+		}
+
+	}
+
+	private static void initLog() {
+
+		try {
+
+			CLYLoggerManager.initPropertiesConfig(
+					ConfigClient.getInputStream("/cloud.security/cloud.security.server.log4j.properties"));
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+			CLYLoggerManager.getRootLogger().fatalException(e);
+
+		}
+
 	}
 
 }
