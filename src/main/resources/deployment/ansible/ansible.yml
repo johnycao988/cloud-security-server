@@ -2,11 +2,9 @@
 - hosts: webservers
   remote_user: jenkins
   tasks:
-  - name: Fetch App config
-    shell: git fetch
-
-  - name: Merge App config
-    shell: git merge origin/master
+  - name: Fetch App config files...
+    shell: cd /AppConfig && git fetch && git merge origin/master
+ 
     
   - name: Stop Cloud Security Server Containers...
     shell: docker stop cloud.security.server
