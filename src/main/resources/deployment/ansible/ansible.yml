@@ -13,7 +13,7 @@
     copy: src=cloud-security-server.war dest=/tmp
 
   - name: Copy war to docker containers...
-    shell: docker cp /tmp/cloud-security-server.war cloud.security.server:usr/local/tomcat/webapps 
+    shell: docker cp /tmp/cloud-security-server.war cloud.security.service:usr/local/tomcat/webapps 
 
   - name: Start CS Security Server containers...
     shell: docker start cloud.security.service
