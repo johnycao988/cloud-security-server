@@ -1,11 +1,11 @@
 # create Apache Active Directory (LDAP SERVER) docker container
-docker run -d -p 10389:10389 --name ds.server enschede/apache-directory-server
+docker run -h 10.39.101.226  -e SERVICE_NAME=apache.directory.server -d -p 10389:10389 --name ds.server enschede/apache-directory-server
 
 # create Redis Server docker container
-docker run -d -p 6379:6379 -v /docker/redis/redis.conf:/usr/local/etc/redis/redis.conf --name redis.server 10.39.101.226:5000/redis redis-server /usr/local/etc/redis/redis.conf
+docker run -h 10.39.101.226  -e SERVICE_NAME=redis.server  -d -p 6379:6379 -v /docker/redis/redis.conf:/usr/local/etc/redis/redis.conf --name redis.server 10.39.101.226:5000/redis redis-server /usr/local/etc/redis/redis.conf
 
 # create Security Server docker-container;
-docker run -d -p 8099:8080 --name cloud.security.service -e SERVICE_NAME=cloud.security.service -v /AppConfig/test/tomcat.conf:/usr/local/tomcat/conf 10.39.101.226:5000/tomcat
+docker run -h 10.39.101.226 -d -p 8099:8080 --name cloud.security.service -e SERVICE_NAME=cloud.security.service -v /AppConfig/test/tomcat.conf:/usr/local/tomcat/conf 10.39.101.226:5000/tomcat
 
  
 # JVM Variables
